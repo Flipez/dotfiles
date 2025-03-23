@@ -1,0 +1,10 @@
+[user]
+	name = Robert Müller
+	email = code@brauser.io
+	signingkey = E76C944EDCBDD236
+[core]
+	pager = less -F -X
+[pull]
+	rebase = false
+[init]
+	defaultBranch = main
