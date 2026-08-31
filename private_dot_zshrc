@@ -18,9 +18,16 @@ eval "$(mise activate zsh)"      # python, uv
 eval "$(rbenv init - zsh)"       # ruby
 
 # ───────────────────────────────────────────────────────────── gcloud
-GCLOUD_SDK="$HOME/Downloads/google-cloud-sdk"
-[[ -f "$GCLOUD_SDK/path.zsh.inc"       ]] && source "$GCLOUD_SDK/path.zsh.inc"
-[[ -f "$GCLOUD_SDK/completion.zsh.inc" ]] && source "$GCLOUD_SDK/completion.zsh.inc"
+# path.zsh.inc is what puts the SDK's bin/ on $PATH — without it,
+# gke-gcloud-auth-plugin is invisible and kubectl can't auth to GKE.
+# Completions are sourced after compinit, further down.
+for d in /opt/homebrew/share/google-cloud-sdk /usr/share/google-cloud-sdk "$HOME/google-cloud-sdk"; do
+  if [[ -f "$d/path.zsh.inc" ]]; then
+    GCLOUD_SDK="$d"
+    source "$d/path.zsh.inc"
+    break
+  fi
+done
 
 # ──────────────────────────────────────────────────────────── history
 HISTFILE=~/.zsh_history
@@ -46,6 +53,12 @@ zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 zstyle ':completion:*:descriptions' format '%F{blue}%d%f'
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path "$HOME/.zsh/cache"
+
+# gcloud's include calls bashcompinit/compinit itself, so it must come after
+# ours — sourcing it earlier makes compinit run twice. $GCLOUD_SDK is set by
+# the gcloud PATH block above.
+[[ -n "$GCLOUD_SDK" && -f "$GCLOUD_SDK/completion.zsh.inc" ]] &&
+  source "$GCLOUD_SDK/completion.zsh.inc"
 
 # ─────────────────────────────────────────────────────────── keybinds
 bindkey -e                                        # emacs mode
