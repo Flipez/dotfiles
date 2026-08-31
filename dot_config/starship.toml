@@ -1,0 +1,79 @@
+# starship prompt — replaces ~/.p10k.zsh (1671 lines → this)
+# Reference: https://starship.rs/config/
+
+format = """
+$directory$git_branch$git_status$kubernetes$terraform
+$character"""
+
+right_format = "$cmd_duration$golang$ruby$python$nodejs"
+
+add_newline = true
+
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
+
+[directory]
+style = "bold cyan"
+truncation_length = 3
+truncate_to_repo = true
+read_only = " "
+
+[git_branch]
+symbol = " "
+style = "bold purple"
+format = "[$symbol$branch]($style) "
+
+[git_status]
+style = "bold yellow"
+format = "([$all_status$ahead_behind]($style) )"
+conflicted = "="
+ahead = "⇡${count}"
+behind = "⇣${count}"
+diverged = "⇕⇡${ahead_count}⇣${behind_count}"
+untracked = "?${count}"
+stashed = "$${count}"
+modified = "!${count}"
+staged = "+${count}"
+renamed = "»${count}"
+deleted = "✘${count}"
+
+# Off by default in starship — you live in kubectl, so it's on.
+[kubernetes]
+disabled = false
+symbol = "☸ "
+style = "bold blue"
+format = '[$symbol$context( \($namespace\))]($style) '
+
+# Collapse verbose GKE/EKS context names down to just the cluster name.
+[kubernetes.context_aliases]
+"gke_.*_.*_(?P<cluster>[\\w-]+)" = "$cluster"
+"arn:aws:eks:[^:]*:[0-9]*:cluster/(?P<cluster>[\\w-]+)" = "$cluster"
+
+[terraform]
+symbol = "󱁢 "
+style = "bold 105"
+format = "[$symbol$workspace]($style) "
+
+[cmd_duration]
+min_time = 2000
+style = "yellow"
+format = "[$duration]($style) "
+
+# Language versions, shown only in relevant directories, on the right.
+[golang]
+format = "[$symbol($version)]($style) "
+[ruby]
+format = "[$symbol($version)]($style) "
+[python]
+format = "[$symbol($version)]($style) "
+[nodejs]
+format = "[$symbol($version)]($style) "
+
+# Noise reduction: these fire often and rarely tell you anything useful.
+[gcloud]
+disabled = true
+[aws]
+disabled = true
+[package]
+disabled = true

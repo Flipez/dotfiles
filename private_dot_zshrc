@@ -1,136 +1,99 @@
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-# Initialization code that may require console input (password prompts, [y/n]
-# confirmations, etc.) must go above this block; everything else may go below.
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
+# ~/.zshrc — interactive shells only.
+#   ~/.zshenv   → env for every zsh (cargo)
+#   ~/.zprofile → login shells (homebrew shellenv)
+#   this file   → prompt, completion, history, keys, aliases
 
-# If you come from bash you might have to change your $PATH.
-# export PATH=$HOME/bin:/usr/local/bin:$PATH
-
-# Path to your oh-my-zsh installation.
-export ZSH="/Users/robert/.oh-my-zsh"
-export PATH=${HOME}/go/bin:$PATH
-export PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"
-export PATH="/usr/local/opt/gettext/bin:$PATH"
-
-# Set name of the theme to load --- if set to "random", it will
-# load a random theme each time oh-my-zsh is loaded, in which case,
-# to know which specific one was loaded, run: echo $RANDOM_THEME
-# See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
-#ZSH_THEME="robbyrussell"
-#ZSH_THEME="bureau"
-ZSH_THEME="powerlevel10k/powerlevel10k"
-POWERLEVEL9K_MODE="awesome-patched"
-
-# Set list of themes to pick from when loading at random
-# Setting this variable when ZSH_THEME=random will cause zsh to load
-# a theme from this variable instead of looking in ~/.oh-my-zsh/themes/
-# If set to an empty array, this variable will have no effect.
-# ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
-
-# Uncomment the following line to use case-sensitive completion.
-# CASE_SENSITIVE="true"
-
-# Uncomment the following line to use hyphen-insensitive completion.
-# Case-sensitive completion must be off. _ and - will be interchangeable.
-# HYPHEN_INSENSITIVE="true"
-
-# Uncomment the following line to disable bi-weekly auto-update checks.
-# DISABLE_AUTO_UPDATE="true"
-
-# Uncomment the following line to automatically update without prompting.
-# DISABLE_UPDATE_PROMPT="true"
-
-# Uncomment the following line to change how often to auto-update (in days).
-# export UPDATE_ZSH_DAYS=13
-
-# Uncomment the following line if pasting URLs and other text is messed up.
-# DISABLE_MAGIC_FUNCTIONS=true
-
-# Uncomment the following line to disable colors in ls.
-# DISABLE_LS_COLORS="true"
-
-# Uncomment the following line to disable auto-setting terminal title.
-# DISABLE_AUTO_TITLE="true"
-
-# Uncomment the following line to enable command auto-correction.
-# ENABLE_CORRECTION="true"
-
-# Uncomment the following line to display red dots whilst waiting for completion.
-# COMPLETION_WAITING_DOTS="true"
-
-# Uncomment the following line if you want to disable marking untracked files
-# under VCS as dirty. This makes repository status check for large repositories
-# much, much faster.
-# DISABLE_UNTRACKED_FILES_DIRTY="true"
-
-# Uncomment the following line if you want to change the command execution time
-# stamp shown in the history command output.
-# You can set one of the optional three formats:
-# "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
-# or set a custom format using the strftime function format specifications,
-# see 'man strftime' for details.
-# HIST_STAMPS="mm/dd/yyyy"
-
-# Would you like to use another custom folder than $ZSH/custom?
-# ZSH_CUSTOM=/path/to/new-custom-folder
-
-# Which plugins would you like to load?
-# Standard plugins can be found in ~/.oh-my-zsh/plugins/*
-# Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
-# Example format: plugins=(rails git textmate ruby lighthouse)
-# Add wisely, as too many plugins slow down shell startup.
-plugins=(
-  git
-  git-extras
-  bundler
-  dotenv
-  osx
-  rake
-  rbenv
-  ruby
-  kubectl
-  golang
+# ─────────────────────────────────────────────────────────────── PATH
+# GOPATH is $HOME/go; hardcoded rather than `go env GOPATH` to avoid a
+# subprocess on every shell start.
+path=(
+  "$HOME/.local/bin"
+  "$HOME/go/bin"
+  "${KREW_ROOT:-$HOME/.krew}/bin"
+  $path
 )
 
-source $ZSH/oh-my-zsh.sh
+# ─────────────────────────────────────────────────── version managers
+eval "$(mise activate zsh)"      # python, uv
+eval "$(rbenv init - zsh)"       # ruby
 
-# User configuration
+# ───────────────────────────────────────────────────────────── gcloud
+GCLOUD_SDK="$HOME/Downloads/google-cloud-sdk"
+[[ -f "$GCLOUD_SDK/path.zsh.inc"       ]] && source "$GCLOUD_SDK/path.zsh.inc"
+[[ -f "$GCLOUD_SDK/completion.zsh.inc" ]] && source "$GCLOUD_SDK/completion.zsh.inc"
 
-# export MANPATH="/usr/local/man:$MANPATH"
+# ──────────────────────────────────────────────────────────── history
+HISTFILE=~/.zsh_history
+HISTSIZE=50000
+SAVEHIST=50000
+setopt SHARE_HISTORY EXTENDED_HISTORY INC_APPEND_HISTORY
+setopt HIST_IGNORE_DUPS HIST_IGNORE_SPACE HIST_REDUCE_BLANKS HIST_VERIFY
 
-# You may need to manually set your language environment
-# export LANG=en_US.UTF-8
+# ──────────────────────────────────────────────────────── shell opts
+setopt AUTO_CD AUTO_PUSHD PUSHD_IGNORE_DUPS PUSHD_SILENT
+setopt INTERACTIVE_COMMENTS EXTENDED_GLOB
+unsetopt BEEP
 
-# Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
+# ──────────────────────────────────────────────────────── completion
+fpath=("$HOME/.zsh/completions" /opt/homebrew/share/zsh/site-functions $fpath)
+autoload -Uz compinit
+# Full rebuild at most once a day; otherwise trust the cached dump.
+if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then compinit; else compinit -C; fi
 
-# Compilation flags
-# export ARCHFLAGS="-arch x86_64"
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'   # case-insensitive
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*:descriptions' format '%F{blue}%d%f'
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path "$HOME/.zsh/cache"
 
-# Set personal aliases, overriding those provided by oh-my-zsh libs,
-# plugins, and themes. Aliases can be placed here, though oh-my-zsh
-# users are encouraged to define aliases within the ZSH_CUSTOM folder.
-# For a full list of active aliases, run `alias`.
-#
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
+# ─────────────────────────────────────────────────────────── keybinds
+bindkey -e                                        # emacs mode
+autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+bindkey '^[[A' up-line-or-beginning-search        # ↑ searches by prefix
+bindkey '^[[B' down-line-or-beginning-search      # ↓ searches by prefix
+bindkey '^[[1;5C' forward-word                    # ctrl-→
+bindkey '^[[1;5D' backward-word                   # ctrl-←
+bindkey '^[[H' beginning-of-line
+bindkey '^[[F' end-of-line
+bindkey '^[[3~' delete-char
 
-source /usr/local/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+# ──────────────────────────────────────────────────────────── aliases
+alias k='kubectl'
+compdef k=kubectl
+alias gcp-auth='BROWSER=firefox-gcp gcloud auth login --update-adc'
+# Bastion tunnels are handled by _moz_k8s_config (see custom functions below),
+# which opens its own SOCKS proxy on 1701/1702/1703 per realm.
 
-source $HOME/.oh-my-zsh/custom/plugins/zsh-histdb/sqlite-history.zsh
-autoload -Uz add-zsh-hook
+# eza was installed but never wired up
+if (( $+commands[eza] )); then
+  alias ls='eza --group-directories-first'
+  alias ll='eza -l --git --group-directories-first'
+  alias la='eza -la --git --group-directories-first'
+  alias lt='eza --tree --level=2'
+fi
 
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
-export PATH="/usr/local/opt/ruby/bin:$PATH"
+# ─────────────────────────────────────────────────────────── k8s base
+# `current-context` in ~/.kube/config is k3s-cloud, which lives in k3s.yaml —
+# both files must be in scope or kubectl (and the starship prompt) can't
+# resolve it. The mozilla-k8s functions below override KUBECONFIG per cluster.
+export KUBECONFIG="$HOME/.kube/config:$HOME/.kube/k3s.yaml"
 
-# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
-export PATH="$PATH:$HOME/.rvm/bin"
-export PATH="/usr/local/sbin:$PATH"
+# ────────────────────────────────────────────────── custom functions
+[[ -r "$HOME/.zsh/functions/mozilla-k8s.zsh" ]] && source "$HOME/.zsh/functions/mozilla-k8s.zsh"
+
+# ──────────────────────────────────────────────────────────── secrets
+# Mode 600, never committed. See comments in the file for the `op` upgrade.
+[[ -r "$HOME/.zsh/secrets.zsh" ]] && source "$HOME/.zsh/secrets.zsh"
+
+# ──────────────────────────────────────────────── fzf (ctrl-r, ctrl-t)
+(( $+commands[fzf] )) && source <(fzf --zsh)
+
+# ───────────────────────────────────────────────────────────── prompt
+eval "$(starship init zsh)"
+
+# ───────────────────────────────────────────── plugins (order matters)
+source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh  # must be last

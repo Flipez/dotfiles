@@ -1,0 +1,10 @@
+# Machine-local only: this repo is public.
+.zsh/secrets.zsh                # tokens, mode 600
+.zsh/functions/mozilla-k8s.zsh  # work-only helpers
+
+# Retired: replaced by .config/starship.toml
+.p10k.zsh
+
+# Held back deliberately: the repo version carries a different git identity
+# than this machine. Template on a `work` variable before managing again.
+.gitconfig
