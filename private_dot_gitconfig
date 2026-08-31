@@ -1,10 +1,8 @@
 [user]
-	name = Robert Müller
-	email = code@brauser.io
-	signingkey = E76C944EDCBDD236
-[core]
-	pager = less -F -X
-[pull]
-	rebase = false
+        email = rmuller@mozilla.com
+        name = Robert Müller
+        signingkey = EF70CE1126C0CBF64C3798FE0C5D62781E17C7D7
 [init]
-	defaultBranch = main
+        defaultBranch = main
+[commit]
+        gpgsign = true

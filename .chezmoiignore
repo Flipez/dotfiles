@@ -5,6 +5,4 @@
 # Retired: replaced by .config/starship.toml
 .p10k.zsh
 
-# Held back deliberately: the repo version carries a different git identity
-# than this machine. Template on a `work` variable before managing again.
-.gitconfig
+# .gitconfig holds the work identity — template it before use on a personal machine.
