@@ -46,9 +46,14 @@ style = "bold blue"
 format = '[$symbol$context( \($namespace\))]($style) '
 
 # Collapse verbose GKE/EKS context names down to just the cluster name.
-[kubernetes.context_aliases]
-"gke_.*_.*_(?P<cluster>[\\w-]+)" = "$cluster"
-"arn:aws:eks:[^:]*:[0-9]*:cluster/(?P<cluster>[\\w-]+)" = "$cluster"
+# `contexts` replaced the deprecated `context_aliases` table.
+[[kubernetes.contexts]]
+context_pattern = "gke_.*_.*_(?P<cluster>[\\w-]+)"
+context_alias = "$cluster"
+
+[[kubernetes.contexts]]
+context_pattern = "arn:aws:eks:[^:]*:[0-9]*:cluster/(?P<cluster>[\\w-]+)"
+context_alias = "$cluster"
 
 [terraform]
 symbol = "󱁢 "
